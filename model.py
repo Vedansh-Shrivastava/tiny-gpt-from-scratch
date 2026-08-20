@@ -240,8 +240,16 @@ def max_along_axis(arr, axis):
     # TODO: compute the maximum value of arr along the given axis
     return np.max(arr, axis=axis)
 
-# Step 27 - matmul (not yet solved)
-# TODO: implement
+# Step 27 - matmul
+import numpy as np
+
+def matmul(a, b):
+    """Return the matrix product a @ b for 2D arrays a (M,K) and b (K,N)."""
+    # TODO: compute the matrix product of a and b
+    m, n = a.shape
+    p, q = b.shape
+    if n == p:
+        return a @ b
 
 # Step 28 - transpose_matrix (not yet solved)
 # TODO: implement
