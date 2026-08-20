@@ -142,7 +142,7 @@ import numpy as np
 def slice_row(arr, i):
     """Return row i of a 2D array as a 1D view."""
     # TODO: return the i-th row of arr as a 1D array of shape (C,)
-    return arr[i]
+    return arr[i, :]
 
 # Step 15 - slice_column (not yet solved)
 # TODO: implement
