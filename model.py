@@ -568,8 +568,11 @@ def logits_to_probs_rowwise(logits):
     softmax = array_exp(vec) / sum_keepdims(array_exp(vec), axis=1)
     return softmax
 
-# Step 64 - gather_correct_token_probs (not yet solved)
-# TODO: implement
+# Step 64 - gather_correct_token_probs
+def gather_correct_token_probs(probs, targets):
+    """Return probs[i, targets[i]] for each i, shape (B,)."""
+    # TODO: pick out the probability assigned to the correct next token for each batch row
+    return probs[np.arange(len(targets)), targets]
 
 # Step 65 - cross_entropy_loss (not yet solved)
 # TODO: implement
