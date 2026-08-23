@@ -787,8 +787,14 @@ def softmax_cross_entropy_backward(probs, targets):
     dlogits /= len(targets)
     return dlogits
 
-# Step 84 - layernorm_forward_mean (not yet solved)
-# TODO: implement
+# Step 84 - layernorm_forward_mean
+import numpy as np
+
+def layernorm_forward_mean(x):
+    """Return the per-row mean of x with shape (B, 1)."""
+    # TODO: compute the per-row mean of x, preserving the reduced axis as size 1
+    d = x.shape[-1]
+    return sum_keepdims(x, -1) / d
 
 # Step 85 - layernorm_forward_variance (not yet solved)
 # TODO: implement
