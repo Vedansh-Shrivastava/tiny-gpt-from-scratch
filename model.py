@@ -1035,8 +1035,10 @@ def compute_key(x, w_k):
     # TODO: project the (B, T, d_model) input through w_k to produce (B, T, d_head) keys.
     return x @ w_k
 
-# Step 102 - compute_value (not yet solved)
-# TODO: implement
+# Step 102 - compute_value
+def compute_value(x, w_v):
+    # TODO: project x of shape (B, T, d_model) by w_v of shape (d_model, d_head)
+    return x @ w_v
 
 # Step 103 - compute_attention_scores (not yet solved)
 # TODO: implement
