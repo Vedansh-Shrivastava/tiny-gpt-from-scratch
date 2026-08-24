@@ -1192,8 +1192,35 @@ def qk_scores_backward(d_scores, cache):
         'd_k': d_k,
     }
 
-# Step 115 - qkv_projection_backward (not yet solved)
-# TODO: implement
+# Step 115 - qkv_projection_backward
+def qkv_projection_backward(d_q, d_k, d_v, cache):
+    # TODO: backprop through Q=x@Wq, K=x@Wk, V=x@Wv to get dx and dw_q, dw_k, dw_v.
+    x = cache['x']
+    w_q = cache['w_q']
+    w_k = cache['w_k']
+    w_v = cache['w_v']
+
+    dx_q = d_q @ w_q.T
+    dx_k = d_k @ w_k.T
+    dx_v = d_v @ w_v.T
+
+    dx = dx_q + dx_k + dx_v
+
+    x_flat = x.reshape(-1, x.shape[-1])
+    dq_flat = d_q.reshape(-1, d_q.shape[-1])
+    dk_flat = d_k.reshape(-1, d_k.shape[-1])
+    dv_flat = d_v.reshape(-1, d_v.shape[-1])
+
+    dw_q = x_flat.T @ dq_flat
+    dw_k = x_flat.T @ dk_flat
+    dw_v = x_flat.T @ dv_flat
+
+    return {
+        'dx': dx,
+        'dw_q': dw_q,
+        'dw_k': dw_k,
+        'dw_v': dw_v,
+    }
 
 # Step 116 - choose_attention_head_config (not yet solved)
 # TODO: implement
