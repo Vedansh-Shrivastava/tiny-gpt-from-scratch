@@ -1072,8 +1072,15 @@ def apply_causal_mask(scaled_scores, causal_mask):
     # TODO: return a (B,T,T) array where positions with causal_mask False are -inf...
     return np.where(causal_mask, scaled_scores, -np.inf)
 
-# Step 107 - softmax_attention_weights (not yet solved)
-# TODO: implement
+# Step 107 - softmax_attention_weights
+import numpy as np
+
+def softmax_attention_weights(masked_scores):
+    """Row-wise stable softmax over the last axis of (B, T, T) scores."""
+    # TODO: apply numerically stable softmax along the last axis of masked_scores
+    max_scores = np.max(masked_scores, axis=-1, keepdims=True)
+    exp_scores = np.exp(masked_scores - max_scores)
+    return exp_scores / np.sum(exp_scores, axis=-1, keepdims=True)
 
 # Step 108 - attention_weighted_values (not yet solved)
 # TODO: implement
