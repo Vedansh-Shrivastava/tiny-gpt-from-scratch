@@ -1289,8 +1289,13 @@ def get_multihead_sequence_length(x):
     b, t, d = get_array_shape(x)
     return t
 
-# Step 123 - compute_d_head (not yet solved)
-# TODO: implement
+# Step 123 - compute_d_head
+def compute_d_head(d_model, n_heads):
+    # TODO: return the per-head dimension d_head for multi-head attention.
+    if d_model % n_heads != 0:
+        raise ValueError("d_model must be divisible by n_heads")
+
+    return d_model // n_heads
 
 # Step 124 - multihead_masked_softmax_scores (not yet solved)
 # TODO: implement
