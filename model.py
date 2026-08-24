@@ -1331,8 +1331,12 @@ def transpose_heads_to_back(x_heads):
     # TODO: move the heads axis back so the result has shape (B, T, n_heads, d_head).
     return np.ascontiguousarray(np.transpose(x_heads, (0, 2, 1, 3)))
 
-# Step 127 - get_multihead_output_sequence_length (not yet solved)
-# TODO: implement
+# Step 127 - get_multihead_output_sequence_length
+def get_multihead_output_sequence_length(x_heads_back):
+    """Return T from a (B, T, n_heads, d_head) tensor."""
+    # TODO: read the sequence-length dimension from x_heads_back's shape
+    b,t,n,d = x_heads_back.shape
+    return t
 
 # Step 128 - merge_heads_to_d_model (not yet solved)
 # TODO: implement
