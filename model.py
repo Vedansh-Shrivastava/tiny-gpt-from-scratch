@@ -1280,8 +1280,14 @@ def get_multihead_n_heads(config):
     # TODO: return the number of attention heads stored in the multi-head config dict.
     return config['n_heads']
 
-# Step 122 - get_multihead_sequence_length (not yet solved)
-# TODO: implement
+# Step 122 - get_multihead_sequence_length
+import numpy as np
+
+def get_multihead_sequence_length(x):
+    """Return T from x of shape (B, T, d_model)."""
+    # TODO: return the sequence length T from the (B, T, d_model) tensor.
+    b, t, d = get_array_shape(x)
+    return t
 
 # Step 123 - compute_d_head (not yet solved)
 # TODO: implement
