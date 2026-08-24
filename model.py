@@ -1258,8 +1258,14 @@ def create_multihead_output_projection(d_model, scale=0.02):
     Wo = make_2d_random(d_model, d_model, seed=0)
     return scale_w_small(Wo, scale)
 
-# Step 119 - reshape_to_heads (not yet solved)
-# TODO: implement
+# Step 119 - reshape_to_heads
+import numpy as np
+
+def reshape_to_heads(x, n_heads, d_head):
+    """Reshape (B, T, d_model) into (B, T, n_heads, d_head)."""
+    # TODO: split the last dimension of x into n_heads chunks of size d_head
+    B, T, _ = x.shape
+    return x.reshape(B, T, n_heads, d_head)
 
 # Step 120 - transpose_heads_to_front (not yet solved)
 # TODO: implement
