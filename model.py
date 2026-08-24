@@ -1166,8 +1166,13 @@ def softmax_attention_weights(masked_scores):
 # Step 135 - residual_forward (not yet solved)
 # TODO: implement
 
-# Step 136 - residual_backward (not yet solved)
-# TODO: implement
+# Step 136 - residual_backward
+def residual_backward(d_y):
+    """Backprop through y = x + sublayer_out. Returns (d_x, d_sublayer_out)."""
+    # TODO: route the upstream gradient to both branches of the residual add.
+    dx = d_y.copy()
+    ds = d_y.copy()
+    return dx, ds
 
 # Step 137 - pre_layernorm_sublayer_forward (not yet solved)
 # TODO: implement
