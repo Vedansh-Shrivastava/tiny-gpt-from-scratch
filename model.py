@@ -1162,8 +1162,13 @@ def masked_softmax_backward(d_attn, cache):
 
     return d_masked_scores
 
-# Step 113 - scale_scores_backward (not yet solved)
-# TODO: implement
+# Step 113 - scale_scores_backward
+import numpy as np
+
+def scale_scores_backward(d_scaled_scores, d_head):
+    """Backprop through the 1/sqrt(d_head) attention score scaling."""
+    # TODO: propagate d_scaled_scores back through the sqrt(d_head) scaling
+    return d_scaled_scores * (1/np.sqrt(d_head))
 
 # Step 114 - qk_scores_backward (not yet solved)
 # TODO: implement
