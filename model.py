@@ -1411,9 +1411,9 @@ def ffn_activation_forward(h1):
         cache: dict with key 'h1'
     """
     # TODO: apply ReLU activation in the FFN hidden layer and cache h1
-    relu_result = relu_forward(h1)
+    a1 = relu_forward(h1)
 
-    return  relu_result['y'], {'h1': h1},
+    return  a1['y'], {'h1': h1},
 
 # Step 133 - ffn_linear_two_forward (not yet solved)
 # TODO: implement
