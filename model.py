@@ -2114,7 +2114,8 @@ def wire_full_training_loop(params, train_ids, val_ids, block_size, batch_size, 
 
     history = []
 
-    for step in range(1, n_steps + 1):
+    for step in range(n_steps):
+        adam_step = step + 1
 
         # ------------------------------------------------------------
         # 1. Sample mini-batch
@@ -2223,11 +2224,11 @@ def wire_full_training_loop(params, train_ids, val_ids, block_size, batch_size, 
 
                 # Bias correction.
                 m_hat = m_tree / (
-                    1.0 - beta1 ** step
+                    1.0 - beta1 ** adam_step
                 )
 
                 v_hat = v_tree / (
-                    1.0 - beta2 ** step
+                    1.0 - beta2 ** adam_step
                 )
 
                 # Adam parameter update.
