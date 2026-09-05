@@ -2347,8 +2347,11 @@ def take_last_position_logits(logits):
     # TODO: slice out the logits at the final time step from a (1, T, V) tensor.
     return logits[:, -1, :]
 
-# Step 160 - apply_temperature (not yet solved)
-# TODO: implement
+# Step 160 - apply_temperature
+def apply_temperature(logits, temperature):
+    """Scale logits by 1/temperature before softmax sampling."""
+    # TODO: rescale logits by the temperature to sharpen or flatten sampling
+    return logits / temperature
 
 # Step 161 - top_k_filter (not yet solved)
 # TODO: implement
