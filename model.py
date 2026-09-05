@@ -1703,8 +1703,66 @@ def transformer_block_backward(d_y, cache, block_params):
 
     return d_x, grads
 
-# Step 140 - stack_transformer_blocks (not yet solved)
-# TODO: implement
+# Step 140 - stack_transformer_blocks
+import numpy as np
+
+def stack_transformer_blocks(n_layers, d_model, n_heads, d_ff):
+    """Build a list of n_layers Transformer block parameter dicts.
+
+    Each block dict has keys 'ln1', 'attn', 'ln2', 'ffn'.
+    """
+    # TODO: create n_layers initialized block parameter dicts and return them as a list
+    blocks = []
+
+    for _ in range(n_layers):
+        ln1 = {
+            'gamma': np.ones(d_model),
+            'beta': np.zeros(d_model),
+        }
+
+        ln2 = {
+            'gamma': np.ones(d_model),
+            'beta': np.zeros(d_model),
+        }
+
+        # Upstream attention initializers
+        qkv = create_multihead_qkv_projections(d_model)
+
+        attn = {
+            'Wq': qkv['Wq'],
+            'Wk': qkv['Wk'],
+            'Wv': qkv['Wv'],
+            'Wo': create_multihead_output_projection(d_model),
+            'bo': np.zeros(d_model),
+        }
+
+        # Upstream FFN initializers.
+        # Fixed seeds intentionally make each block identical.
+        W1 = scale_w_small(
+            make_2d_random(d_model, d_ff, seed=0),
+            0.02
+        )
+
+        W2 = scale_w_small(
+            make_2d_random(d_ff, d_model, seed=1),
+            0.02
+        )
+
+        ffn = {
+            'W1': W1,
+            'b1': np.zeros(d_ff),
+            'W2': W2,
+            'b2': np.zeros(d_model),
+        }
+
+        blocks.append({
+            'ln1': ln1,
+            'attn': attn,
+            'ln2': ln2,
+            'ffn': ffn,
+        })
+
+    return blocks
 
 # Step 141 - forward_through_all_blocks (not yet solved)
 # TODO: implement
