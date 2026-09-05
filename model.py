@@ -2260,8 +2260,62 @@ def wire_full_training_loop(params, train_ids, val_ids, block_size, batch_size, 
 
     return params, history
 
-# Step 155 - logging_and_validation_loss (not yet solved)
-# TODO: implement
+# Step 155 - logging_and_validation_loss
+def logging_and_validation_loss(params, val_ids, block_size, batch_size, n_eval_batches):
+    """Estimate validation cross-entropy loss by averaging over several batches."""
+    # TODO: sample n_eval_batches from val_ids and average the per-batch cross-entropy loss
+    rng = np.random.default_rng(0)
+
+    losses = []
+
+    for _ in range(n_eval_batches):
+        # Sample a fresh validation batch.
+        x, y = get_batch(
+            val_ids,
+            block_size,
+            batch_size,
+            rng
+        )
+
+        # Forward pass.
+        logits, _ = full_model_forward(
+            x,
+            params
+        )
+
+        B, T, V = logits.shape
+
+        # Numerically stable row-wise softmax.
+        shifted = logits - np.max(
+            logits,
+            axis=-1,
+            keepdims=True
+        )
+
+        exp_logits = np.exp(shifted)
+
+        probs = exp_logits / np.sum(
+            exp_logits,
+            axis=-1,
+            keepdims=True
+        )
+
+        # Probability assigned to the correct next token.
+        correct_probs = probs[
+            np.arange(B)[:, None],
+            np.arange(T)[None, :],
+            y
+        ]
+
+        # Mean cross-entropy for this batch.
+        batch_loss = -np.mean(
+            np.log(correct_probs + 1e-12)
+        )
+
+        losses.append(batch_loss)
+
+    # Mean across evaluation batches.
+    return float(np.mean(losses))
 
 # Step 156 - encode_prompt (not yet solved)
 # TODO: implement
