@@ -1892,6 +1892,7 @@ def full_model_forward(x_ids, model_params):
     caches = {
         'emb': {
             'tok_cache': tok_cache,
+            'seq_len': x_ids.shape[1]
         },
         'blocks': block_caches,
         'ln_f': ln_f_cache,
@@ -2082,7 +2083,181 @@ def adam_parameter_update(param, m_hat, v_hat, lr, eps):
 def wire_full_training_loop(params, train_ids, val_ids, block_size, batch_size, n_steps, lr, betas, eps):
     """Run the full GPT training loop for n_steps and return (updated_params, history)."""
     # TODO: drive sample-batch -> forward -> loss -> backward -> Adam-update for n_steps...
-    pass
+    beta1, beta2 = betas
+
+    # Random number generator used for mini-batch sampling.
+    rng = np.random.default_rng(0)
+
+    # Adam first- and second-moment trees.
+    def zeros_like_tree(tree):
+        if isinstance(tree, dict):
+            return {
+                key: zeros_like_tree(value)
+                for key, value in tree.items()
+            }
+
+        if isinstance(tree, list):
+            return [
+                zeros_like_tree(value)
+                for value in tree
+            ]
+
+        if isinstance(tree, np.ndarray):
+            return np.zeros_like(tree, dtype=float)
+
+        raise TypeError(
+            f"Unsupported parameter type: {type(tree)}"
+        )
+
+    m = zeros_like_tree(params)
+    v = zeros_like_tree(params)
+
+    history = []
+
+    for step in range(1, n_steps + 1):
+
+        # ------------------------------------------------------------
+        # 1. Sample mini-batch
+        # ------------------------------------------------------------
+        x, y = get_batch(
+            train_ids,
+            block_size,
+            batch_size,
+            rng
+        )
+
+        # ------------------------------------------------------------
+        # 2. Forward pass
+        # ------------------------------------------------------------
+        logits, caches = full_model_forward(
+            x,
+            params
+        )
+
+        # ------------------------------------------------------------
+        # 3. Cross-entropy loss + gradient w.r.t. logits
+        # ------------------------------------------------------------
+        B, T, V = logits.shape
+        N = B * T
+
+        # Numerically stable softmax.
+        logits_shifted = logits - np.max(
+            logits,
+            axis=-1,
+            keepdims=True
+        )
+
+        exp_logits = np.exp(logits_shifted)
+        probs = exp_logits / np.sum(
+            exp_logits,
+            axis=-1,
+            keepdims=True
+        )
+
+        # Cross-entropy:
+        # L = -1/N * sum log P(correct_token)
+        correct_probs = probs[
+            np.arange(B)[:, None],
+            np.arange(T)[None, :],
+            y
+        ]
+
+        loss = -np.mean(np.log(correct_probs + 1e-12))
+
+        # dL/dlogits = (softmax - one_hot) / N
+        d_logits = probs.copy()
+
+        d_logits[
+            np.arange(B)[:, None],
+            np.arange(T)[None, :],
+            y
+        ] -= 1.0
+
+        d_logits /= N
+
+        # ------------------------------------------------------------
+        # 4. Backward pass
+        # ------------------------------------------------------------
+        grads = full_model_backward(
+            d_logits,
+            caches,
+            params
+        )
+
+        # ------------------------------------------------------------
+        # 5. Adam update
+        # ------------------------------------------------------------
+        def adam_update(param_tree, grad_tree, m_tree, v_tree):
+            if isinstance(param_tree, dict):
+                for key in param_tree:
+                    adam_update(
+                        param_tree[key],
+                        grad_tree[key],
+                        m_tree[key],
+                        v_tree[key]
+                    )
+                return
+
+            if isinstance(param_tree, list):
+                for i in range(len(param_tree)):
+                    adam_update(
+                        param_tree[i],
+                        grad_tree[i],
+                        m_tree[i],
+                        v_tree[i]
+                    )
+                return
+
+            if isinstance(param_tree, np.ndarray):
+                # Update first moment.
+                m_tree[...] = (
+                    beta1 * m_tree
+                    + (1.0 - beta1) * grad_tree
+                )
+
+                # Update second moment.
+                v_tree[...] = (
+                    beta2 * v_tree
+                    + (1.0 - beta2) * (grad_tree ** 2)
+                )
+
+                # Bias correction.
+                m_hat = m_tree / (
+                    1.0 - beta1 ** step
+                )
+
+                v_hat = v_tree / (
+                    1.0 - beta2 ** step
+                )
+
+                # Adam parameter update.
+                param_tree[...] -= (
+                    lr * m_hat
+                    / (np.sqrt(v_hat) + eps)
+                )
+
+                return
+
+            raise TypeError(
+                f"Unsupported parameter type: {type(param_tree)}"
+            )
+
+        adam_update(
+            params,
+            grads,
+            m,
+            v
+        )
+
+        # ------------------------------------------------------------
+        # 6. Record training history
+        # ------------------------------------------------------------
+        history.append({
+            'step': step,
+            'train_loss': float(loss),
+        })
+
+    return params, history
 
 # Step 155 - logging_and_validation_loss (not yet solved)
 # TODO: implement
