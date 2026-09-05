@@ -2055,8 +2055,11 @@ def adam_update_first_moment(m, grad, beta1):
     # TODO: blend previous moment m with current grad using decay beta1
     return beta1 * m + (1 - beta1) * grad
 
-# Step 151 - adam_update_second_moment (not yet solved)
-# TODO: implement
+# Step 151 - adam_update_second_moment
+def adam_update_second_moment(v_prev, grad, beta2):
+    """Update Adam's second-moment estimate v using squared gradient EMA."""
+    # TODO: blend v_prev with the squared gradient using beta2
+    return beta2 * v_prev + (1 - beta2) * (grad ** 2)
 
 # Step 152 - adam_bias_correction (not yet solved)
 # TODO: implement
