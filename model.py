@@ -1900,8 +1900,104 @@ def full_model_forward(x_ids, model_params):
 
     return lm_out['logits'], caches
 
-# Step 146 - full_model_backward (not yet solved)
-# TODO: implement
+# Step 146 - full_model_backward
+def full_model_backward(d_logits, caches, model_params):
+    """Propagate d_logits back through LM head, final LN, blocks, and embeddings.
+
+    Args:
+        d_logits: (B, T, V) gradient w.r.t. the model output
+        caches: nested dict from full_model_forward with keys
+                'emb', 'blocks', 'ln_f', 'lm_head'
+        model_params: nested dict matching the forward's parameter tree
+
+    Returns:
+        grads: nested dict mirroring model_params with keys
+               'tok_emb', 'pos_emb', 'blocks', 'ln_f': {'gamma', 'beta'},
+               'lm_head': {'w_lm', 'b_lm'}
+    """
+    # TODO: walk the forward chain in reverse, returning a grads tree shaped like model_params
+    lm_cache = caches['lm_head']
+
+    x_lm = lm_cache['x']
+    w_lm = lm_cache['w_lm']
+
+    d_x_lm = d_logits @ w_lm.T
+
+    d_w_lm = np.sum(
+        x_lm[..., :, None] * d_logits[..., None, :],
+        axis=(0, 1)
+    )
+
+    d_b_lm = np.sum(d_logits, axis=(0, 1))
+
+    ln_cache = caches['ln_f']
+
+    x = ln_cache['x']
+    var = ln_cache['var']
+    x_hat = ln_cache['x_hat']
+    gamma = ln_cache['gamma']
+
+    d_gamma = np.sum(d_x_lm * x_hat, axis=(0, 1))
+    d_beta = np.sum(d_x_lm, axis=(0, 1))
+
+    d_x_hat = d_x_lm * gamma
+
+    D = x.shape[-1]
+    eps = 1e-5
+    inv_std = 1.0 / np.sqrt(var + eps)
+
+    d_x = (
+        inv_std / D
+        * (
+            D * d_x_hat
+            - np.sum(d_x_hat, axis=-1, keepdims=True)
+            - x_hat * np.sum(
+                d_x_hat * x_hat,
+                axis=-1,
+                keepdims=True
+            )
+        )
+    )
+
+    d_emb, block_grads = backward_through_all_blocks(
+        d_x,
+        caches['blocks'],
+        model_params['blocks']
+    )
+
+    emb_grads = embedding_sum_backward(d_emb)
+
+    d_token = emb_grads['d_token_emb']
+    d_pos = emb_grads['d_pos_emb']
+
+    tok_cache = caches['emb']['tok_cache']
+
+    d_tok_emb = np.zeros_like(model_params['tok_emb'])
+
+    np.add.at(
+        d_tok_emb,
+        tok_cache['token_ids'],
+        d_token
+    )
+
+    seq_len = caches['emb']['seq_len']
+
+    d_pos_emb = np.zeros_like(model_params['pos_emb'])
+    d_pos_emb[:seq_len] = d_pos
+
+    return {
+        'tok_emb': d_tok_emb,
+        'pos_emb': d_pos_emb,
+        'blocks': block_grads,
+        'ln_f': {
+            'gamma': d_gamma,
+            'beta': d_beta,
+        },
+        'lm_head': {
+            'w_lm': d_w_lm,
+            'b_lm': d_b_lm,
+        },
+    }
 
 # Step 147 - initialize_adam_moments (not yet solved)
 # TODO: implement
