@@ -1891,7 +1891,7 @@ def full_model_forward(x_ids, model_params):
 
     caches = {
         'emb': {
-            'token': tok_cache,
+            'tok_cache': tok_cache,
         },
         'blocks': block_caches,
         'ln_f': ln_f_cache,
@@ -2078,8 +2078,11 @@ def adam_parameter_update(param, m_hat, v_hat, lr, eps):
     # TODO: return the updated parameter array of the same shape as param.
     return param - lr * m_hat / (np.sqrt(v_hat) + eps)
 
-# Step 154 - wire_full_training_loop (not yet solved)
-# TODO: implement
+# Step 154 - wire_full_training_loop
+def wire_full_training_loop(params, train_ids, val_ids, block_size, batch_size, n_steps, lr, betas, eps):
+    """Run the full GPT training loop for n_steps and return (updated_params, history)."""
+    # TODO: drive sample-batch -> forward -> loss -> backward -> Adam-update for n_steps...
+    pass
 
 # Step 155 - logging_and_validation_loss (not yet solved)
 # TODO: implement
