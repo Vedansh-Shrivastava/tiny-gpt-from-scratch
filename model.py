@@ -2326,8 +2326,13 @@ def encode_prompt(prompt, stoi):
     ids = encode_string(prompt, stoi)
     return np.array(ids, dtype=int).reshape(1, -1)
 
-# Step 157 - crop_context_to_block_size (not yet solved)
-# TODO: implement
+# Step 157 - crop_context_to_block_size
+def crop_context_to_block_size(context_ids, block_size):
+    # TODO: keep only the most recent block_size tokens of a (1, T) context
+    if context_ids.shape[1] <= block_size:
+        return context_ids
+
+    return context_ids[:, -block_size:]
 
 # Step 158 - forward_to_get_logits (not yet solved)
 # TODO: implement
