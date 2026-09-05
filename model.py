@@ -2397,8 +2397,11 @@ def softmax_to_probs(logits):
         keepdims=True
     )
 
-# Step 163 - sample_one_token (not yet solved)
-# TODO: implement
+# Step 163 - sample_one_token
+def sample_one_token(probs, rng):
+    """Sample one token id from probs of shape (1, vocab_size) using rng."""
+    # TODO: draw a single next-token id from the categorical distribution probs[0]
+    return int(rng.choice(probs.shape[1], p=probs[0]))
 
 # Step 164 - append_token_to_sequence (not yet solved)
 # TODO: implement
