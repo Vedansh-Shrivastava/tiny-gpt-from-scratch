@@ -2353,8 +2353,31 @@ def apply_temperature(logits, temperature):
     # TODO: rescale logits by the temperature to sharpen or flatten sampling
     return logits / temperature
 
-# Step 161 - top_k_filter (not yet solved)
-# TODO: implement
+# Step 161 - top_k_filter
+def top_k_filter(logits, k):
+    """Return logits with all but the top-k entries per row set to -inf."""
+    # TODO: keep only the top-k logits per row, replace the rest with -inf.
+    vocab_size = logits.shape[-1]
+
+    if k >= vocab_size:
+        return logits.copy()
+
+    result = np.full_like(logits, -np.inf)
+
+    top_k_indices = np.argpartition(
+        logits,
+        -k,
+        axis=-1
+    )[:, -k:]
+
+    rows = np.arange(logits.shape[0])[:, None]
+
+    result[rows, top_k_indices] = logits[
+        rows,
+        top_k_indices
+    ]
+
+    return result
 
 # Step 162 - softmax_to_probs (not yet solved)
 # TODO: implement
